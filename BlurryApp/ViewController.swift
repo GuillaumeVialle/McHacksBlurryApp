@@ -26,6 +26,8 @@ UINavigationControllerDelegate {
     var blue:CGFloat!
     var alpha: CGFloat!
     
+    var radius : Int = 200
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         width = 1.0
@@ -33,6 +35,17 @@ UINavigationControllerDelegate {
         green = (255.0/255.0)
         blue = (255.0/255.0)
         alpha = 1.0
+
+    }
+    
+
+    @IBAction func slider(_ sender: UISlider) {
+        sender.maximumValue = 300
+        sender.minimumValue = 10
+        var currentValue = Int(sender.value)
+        print (currentValue)
+        radius = currentValue
+        
     }
     
     override func didReceiveMemoryWarning() {
@@ -52,33 +65,6 @@ UINavigationControllerDelegate {
             
         }
     }
-    
-//    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        if let touch = touches.first {
-//            let currentPoint = touch.location(in: view)
-//            prevPoint2 = prevPoint1
-//            prevPoint1 = touch.previousLocation(in: self.view)
-//            
-//            UIGraphicsBeginImageContext(imagePicked.frame.size)
-//            guard let context = UIGraphicsGetCurrentContext() else {
-//                return
-//            }
-//            
-//            context.move(to:prevPoint2)
-//            context.addQuadCurve(to: prevPoint1, control: prevPoint2)
-//            context.setLineCap(.butt)
-//            context.setLineWidth(width)
-//            context.setStrokeColor(red: red, green: green, blue: blue, alpha: 1.0)
-//            context.setBlendMode(.normal)
-//            context.strokePath()
-//            
-//            imagePicked.image?.draw(in: CGRect(x: 0, y: 0, width: imagePicked.frame.size.width, height: imagePicked.frame.size.height), blendMode: .overlay, alpha: 1.0)
-//            imagePicked.image = UIGraphicsGetImageFromCurrentImageContext()
-//            
-//            UIGraphicsEndImageContext()
-//            lastPoint = currentPoint
-//        }
-//    }
     
     @IBAction func openCameraButton(sender: AnyObject) {
         ResetButton((Any).self)
@@ -123,27 +109,10 @@ UINavigationControllerDelegate {
     }
     
     @IBAction func btn(_ sender: Any) {
-//        let imageData = UIImageJPEGRepresentation(imagePicked.image!, 0.6)
-//        let compressedJPGImage = UIImage(data: imageData!)
-//        let image = simpleBlurFilterExample(inputImage: compressedJPGImage!)
-//        imagePicked.image = image
         blurring = true
     }
     
-    func simpleBlurFilterExample(inputImage: UIImage){
-        // convert UIImage to CIImage
-//        let inputCIImage = CIImage(image: inputImage)!
-//
-//        // Create Blur CIFilter, and set the input image
-//        let blurFilter = CIFilter(name: "CIGaussianBlur")!
-//        blurFilter.setValue(inputCIImage, forKey: kCIInputImageKey)
-//        blurFilter.setValue(8, forKey: kCIInputRadiusKey)
-//
-//        // Get the filtered output image and return it
-//        let outputImage = blurFilter.outputImage!
-//        return UIImage(ciImage: outputImage)
-        
-    }
+
     
     func addBlurArea(x: Int, y: Int) {
         
@@ -157,7 +126,7 @@ UINavigationControllerDelegate {
         blurEffectView.isUserInteractionEnabled = false
         imagePicked.addSubview(blurEffectView)
         
-        let circleSize: CGFloat = 250
+        let circleSize: CGFloat = CGFloat(radius)
         
         let path = UIBezierPath (
             roundedRect: blurEffectView.frame,
