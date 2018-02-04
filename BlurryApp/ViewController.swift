@@ -18,6 +18,8 @@ UINavigationControllerDelegate {
     var prevPoint2: CGPoint!
     var lastPoint:CGPoint!
     
+    var blurring: Bool = false
+    
     var width: CGFloat!
     var red:CGFloat!
     var green:CGFloat!
@@ -39,40 +41,47 @@ UINavigationControllerDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let touch = touches.first {
-            prevPoint1 = touch.previousLocation(in:self.view)
-            prevPoint2 = touch.previousLocation(in:self.view)
-            lastPoint = touch.location(in:self.view)
-        }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if let touch = touches.first {
-            let currentPoint = touch.location(in: view)
-            prevPoint2 = prevPoint1
-            prevPoint1 = touch.previousLocation(in: self.view)
-            
-            UIGraphicsBeginImageContext(imagePicked.frame.size)
-            guard let context = UIGraphicsGetCurrentContext() else {
-                return
+            if (blurring) {
+                let position = touch.location(in: view)
+                //var copyImage: UIImage = imageView.image!
+                
+                addBlurArea(x: Int(position.x), y: Int(position.y))
+                
+                //imageView.image = copyImage
             }
             
-            context.move(to:prevPoint2)
-            context.addQuadCurve(to: prevPoint1, control: prevPoint2)
-            context.setLineCap(.butt)
-            context.setLineWidth(width)
-            context.setStrokeColor(red: red, green: green, blue: blue, alpha: 1.0)
-            context.setBlendMode(.normal)
-            context.strokePath()
-            
-            imagePicked.image?.draw(in: CGRect(x: 0, y: 0, width: imagePicked.frame.size.width, height: imagePicked.frame.size.height), blendMode: .overlay, alpha: 1.0)
-            imagePicked.image = UIGraphicsGetImageFromCurrentImageContext()
-            
-            UIGraphicsEndImageContext()
-            lastPoint = currentPoint
         }
     }
     
+//    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        if let touch = touches.first {
+//            let currentPoint = touch.location(in: view)
+//            prevPoint2 = prevPoint1
+//            prevPoint1 = touch.previousLocation(in: self.view)
+//            
+//            UIGraphicsBeginImageContext(imagePicked.frame.size)
+//            guard let context = UIGraphicsGetCurrentContext() else {
+//                return
+//            }
+//            
+//            context.move(to:prevPoint2)
+//            context.addQuadCurve(to: prevPoint1, control: prevPoint2)
+//            context.setLineCap(.butt)
+//            context.setLineWidth(width)
+//            context.setStrokeColor(red: red, green: green, blue: blue, alpha: 1.0)
+//            context.setBlendMode(.normal)
+//            context.strokePath()
+//            
+//            imagePicked.image?.draw(in: CGRect(x: 0, y: 0, width: imagePicked.frame.size.width, height: imagePicked.frame.size.height), blendMode: .overlay, alpha: 1.0)
+//            imagePicked.image = UIGraphicsGetImageFromCurrentImageContext()
+//            
+//            UIGraphicsEndImageContext()
+//            lastPoint = currentPoint
+//        }
+//    }
+    
     @IBAction func openCameraButton(sender: AnyObject) {
+        ResetButton((Any).self)
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
             let imagePicker = UIImagePickerController()
             imagePicker.delegate = self
@@ -83,6 +92,7 @@ UINavigationControllerDelegate {
     }
     
     @IBAction func openPhotoLibraryButton(sender: AnyObject) {
+        ResetButton((Any).self)
         if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
             let imagePicker = UIImagePickerController()
             imagePicker.delegate = self
@@ -99,6 +109,8 @@ UINavigationControllerDelegate {
     }
     
     @IBAction func saveButt(sender: AnyObject) {
+        
+        
         let imageData = UIImageJPEGRepresentation(imagePicked.image!, 0.6)
         let compressedJPGImage = UIImage(data: imageData!)
         UIImageWriteToSavedPhotosAlbum(compressedJPGImage!, nil, nil, nil)
@@ -111,25 +123,70 @@ UINavigationControllerDelegate {
     }
     
     @IBAction func btn(_ sender: Any) {
-        let imageData = UIImageJPEGRepresentation(imagePicked.image!, 0.6)
-        let compressedJPGImage = UIImage(data: imageData!)
-        let image = simpleBlurFilterExample(inputImage: compressedJPGImage!)
-        imagePicked.image = image
+//        let imageData = UIImageJPEGRepresentation(imagePicked.image!, 0.6)
+//        let compressedJPGImage = UIImage(data: imageData!)
+//        let image = simpleBlurFilterExample(inputImage: compressedJPGImage!)
+//        imagePicked.image = image
+        blurring = true
     }
     
-    func simpleBlurFilterExample(inputImage: UIImage) -> UIImage {
+    func simpleBlurFilterExample(inputImage: UIImage){
         // convert UIImage to CIImage
-        let inputCIImage = CIImage(image: inputImage)!
+//        let inputCIImage = CIImage(image: inputImage)!
+//
+//        // Create Blur CIFilter, and set the input image
+//        let blurFilter = CIFilter(name: "CIGaussianBlur")!
+//        blurFilter.setValue(inputCIImage, forKey: kCIInputImageKey)
+//        blurFilter.setValue(8, forKey: kCIInputRadiusKey)
+//
+//        // Get the filtered output image and return it
+//        let outputImage = blurFilter.outputImage!
+//        return UIImage(ciImage: outputImage)
         
-        // Create Blur CIFilter, and set the input image
-        let blurFilter = CIFilter(name: "CIGaussianBlur")!
-        blurFilter.setValue(inputCIImage, forKey: kCIInputImageKey)
-        blurFilter.setValue(8, forKey: kCIInputRadiusKey)
+    }
+    
+    func addBlurArea(x: Int, y: Int) {
         
-        // Get the filtered output image and return it
-        let outputImage = blurFilter.outputImage!
-        return UIImage(ciImage: outputImage)
+        
+        //var blur: UIView! = view
+        let blurEffect = UIBlurEffect(style: .light)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.frame = imagePicked.frame
+        
+        blurEffectView.alpha = 0.1
+        blurEffectView.isUserInteractionEnabled = false
+        imagePicked.addSubview(blurEffectView)
+        
+        let circleSize: CGFloat = 250
+        
+        let path = UIBezierPath (
+            roundedRect: blurEffectView.frame,
+            cornerRadius: 0)
+        
+        let circle = UIBezierPath (
+            roundedRect: CGRect (origin: CGPoint (x: x - Int(circleSize/2), y: y-Int(circleSize/2)),
+                                 size: CGSize (width: circleSize, height: circleSize)), cornerRadius: circleSize/2)
+        
+        
+        path.append(circle)
+        path.usesEvenOddFillRule = false
+        
+        let maskLayer = CAShapeLayer ()
+        maskLayer.path = path.cgPath
+        maskLayer.fillRule = kCAFillRuleEvenOdd
+        
+        blurEffectView.layer.mask = maskLayer
+        
+    
+        
     }
 
+    @IBAction func ResetButton(_ sender: Any) {
+        for subview in imagePicked.subviews {
+            if subview is UIVisualEffectView {
+                subview.removeFromSuperview()
+            }
+        }
+    }
 }
 
